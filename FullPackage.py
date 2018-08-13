@@ -8,8 +8,14 @@ import urllib.request
 book = xlrd.open_workbook(r"C:\Users\Connor\Documents\TestAPIRequestBook.xlsx")
 sheetRead = book.sheet_by_index(0)
 
+databook = xlrd.open_workbook(r"C:\Users\Connor\Documents\TestAPIRawData.xls")
+dataRead = databook.sheet_by_index(0)
+
 workbook = xlwt.Workbook()
 sheetWrite = workbook.add_sheet('test')
+
+workbookData = xlwt.Workbook()
+dataWrite = workbookData.add_sheet('test')
 
 print("Starting " + str(sheetRead.nrows-1) + " rows calculations")
 
@@ -19,9 +25,20 @@ for i in range(sheetRead.nrows):
         if sheetRead.cell_value(i,p) != "":
             sheetWrite.write(i, p, sheetRead.cell_value(i,p))
 
+for i in range(dataRead.nrows):
+    for p in range(dataRead.ncols):
+        if dataRead.cell_value(i,p) != "":
+            dataWrite.write(i, p, dataRead.cell_value(i,p))
+
+UnixTimeData = []
+for i in range(dataRead.nrows):
+    UnixTimeData.append(dataRead.cell_value(i,0))
+
+print(UnixTimeData)
+
 search = uszipcode.ZipcodeSearchEngine()
 
-
+WrittenIterations = 0
 
 for i in range(sheetRead.nrows-1):
     print("StartingRow" + str(i+1))
@@ -38,8 +55,23 @@ for i in range(sheetRead.nrows-1):
 
     sheetWrite.write(i + 1, 6, UnixTime)
 
-    contents = urllib.request.urlopen("https://api.darksky.net/forecast/8066119e9963349cca1c07b7b9740e45/" + str(Lattertude) + "," + str(Longitude) + "," + str(int(UnixTime))).read()
-    contentssplit = contents.decode("utf-8").split(",")
+    if(UnixTime in UnixTimeData):
+        print("Data Found On Computer")
+        contents = dataRead.cell_value(UnixTimeData.index(UnixTime),1)
+
+    else:
+        contents = urllib.request.urlopen("https://api.darksky.net/forecast/8066119e9963349cca1c07b7b9740e45/" + str(Lattertude) + "," + str(Longitude) + "," + str(int(UnixTime))).read()
+        print("Data Found Online")
+        contents = contents.decode("utf-8")
+
+        dataWrite.write(dataRead.nrows + WrittenIterations, 0, UnixTime)
+        dataWrite.write(dataRead.nrows + WrittenIterations, 1, contents)
+
+        WrittenIterations = WrittenIterations + 1
+
+        workbookData.save(r"C:\Users\Connor\Documents\TestAPIRawData.xls")
+
+    contentssplit = contents.split(",")
 
     Titles = contentssplit
     # Filter data

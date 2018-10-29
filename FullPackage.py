@@ -45,7 +45,7 @@ for i in range(dataRead.nrows):
 print(UnixTimeData)
 
 # Define what search is
-search = uszipcode.ZipcodeSearchEngine()
+search = uszipcode.SearchEngine(simple_zipcode=True)
 
 # Count number written to offline data workbook, used later to determine what line to write to in offline data workbook
 WrittenIterations = 0
@@ -54,8 +54,8 @@ WrittenIterations = 0
 for i in range(sheetRead.nrows-1):
     print("StartingRow" + str(i+1))
     # Determine the longitude and lattitude and write them to the output workbook
-    Longitude = search.by_zipcode(str(int(sheetRead.cell_value(i + 1, 0)))).Longitude
-    Latitude = search.by_zipcode(str(int(sheetRead.cell_value(i + 1, 0)))).Latitude
+    Longitude = search.by_zipcode(str(int(sheetRead.cell_value(i + 1, 0)))).lng
+    Latitude = search.by_zipcode(str(int(sheetRead.cell_value(i + 1, 0)))).lat
     sheetWrite.write(i + 1, 4, Longitude)
     sheetWrite.write(i + 1, 5, Latitude)
 
